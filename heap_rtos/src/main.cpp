@@ -85,6 +85,39 @@ void printMessage(void *parameters) {
 
 void setup() {
 
+  // configure serial
+  Serial.begin(115200);
+
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  Serial.println("Heap Program");
+  Serial.println("Enter a message.");
+
+  // creating tasks
+  // read message
+  xTaskCreatePinnedToCore(
+    readSerial,
+    "Read Serial",
+    1024,
+    NULL,
+    1,
+    NULL,
+    app_cpu
+  );
+
+  // send message
+  xTaskCreatePinnedToCore(
+    printMessage,
+    "Print Message",
+    1024,
+    NULL,
+    1,
+    NULL,
+    app_cpu
+  );
+
+  // delete setup and loop task
+  vTaskDelete(NULL);
+
 }
 
 void loop() {
