@@ -1,5 +1,10 @@
-// using only core 1
 #include <stdlib.h>
+#include <freertos/portmacro.h>
+#include <pins_arduino.h>
+#include <esp32-hal-gpio.h>
+#include <HardwareSerial.h>
+
+// use core 1
 #if CONFIG_FREERTOS_UNICORE
 static const BaseType_t app_cpu = 0;
 #else
@@ -60,7 +65,13 @@ void setup() {
   // configure pin
   pinMode(led_pin, OUTPUT);
 
-  // create task
+  // configure serial
+  Serial.begin(115200);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  Serial.println("Dynamic LED");
+  Serial.println("Enter number in ms to change delay.");
+
+  // toggle task
   xTaskCreatePinnedToCore( // xTaskCreate on vanilla FreeRTOS
       toggleLED,           // Function to be called
       "Toggle LED",        // Task name
@@ -69,7 +80,20 @@ void setup() {
       1,                   // Task Priority
       NULL,                // Task Handle
       app_cpu);            // CPU Core 1
-  )
+
+
+  // read task
+  xTaskCreatePinnedToCore( // xTaskCreate on vanilla FreeRTOS
+      readSerial,           // Function to be called
+      "Read Serial",        // Task name
+      1024,                // Stack size
+      NULL,                // Task parameters
+      1,                   // Task Priority
+      NULL,                // Task Handle
+      app_cpu);            // CPU Core 1
+
+  // delete task
+  vTaskDelete(NULL);
 }
 
 void loop() {
