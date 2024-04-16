@@ -62,7 +62,26 @@ void readSerial(void *parameters) {
   }
 }
 
+// task to print message whenever flag is set and free memory
+void printMessage(void *parameters) {
+  while (1) {
+    if(msg_flag == 1){
+      Serial.println(msg_ptr);
+      
+      Serial.print("Free Heap before: ");
+      Serial.println(xPortGetFreeHeapSize());
 
+      vPortFree(msg_ptr);
+
+      Serial.print("Free Heap after: ");
+      Serial.println(xPortGetFreeHeapSize());
+
+      msg_ptr = NULL;
+      msg_flag = 0;
+
+    }
+  }
+}
 
 void setup() {
 
